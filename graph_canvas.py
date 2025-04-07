@@ -1,5 +1,6 @@
 import tkinter as tk
-import math
+from node import Node
+from edge import Edge
 
 class GraphCanvas:
     def __init__(self, root):
@@ -7,9 +8,9 @@ class GraphCanvas:
         self.canvas = tk.Canvas(root, width=600, height=400, bg="white")
         self.canvas.pack()
 
-        self.node_radius = 20
         self.nodes = []
-        self.selected_nodes = [] 
+        self.edges = []
+        self.selected_nodes = []
 
         self.canvas.bind("<Button-1>", self.on_click)
 
@@ -25,20 +26,18 @@ class GraphCanvas:
             self.create_node(event.x, event.y)
 
     def create_node(self, x, y):
-        r = self.node_radius
-        node_id = self.canvas.create_oval(x - r, y - r, x + r, y + r, fill="skyblue", outline="black")
-        self.nodes.append((x, y, node_id))
+        node = Node(x, y, self.canvas)
+        self.nodes.append(node)
 
     def get_node_at(self, x, y):
-        for node_x, node_y, node_id in self.nodes:
-            if math.hypot(node_x - x, node_y - y) <= self.node_radius:
-                return (node_x, node_y)
+        for node in self.nodes:
+            if node.contains_point(x, y):
+                return node
         return None
 
     def draw_edge(self, node1, node2):
-        x1, y1 = node1
-        x2, y2 = node2
-        self.canvas.create_line(x1, y1, x2, y2, fill="gray", width=2)
+        edge = Edge(node1, node2, self.canvas)
+        self.edges.append(edge)
 
 if __name__ == "__main__":
     root = tk.Tk()
