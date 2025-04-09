@@ -1,7 +1,9 @@
 import tkinter as tk
+from tkinter import simpledialog
 from node import Node
 from edge import Edge
 from graph import Graph
+from edge_dialogue import EdgeDialog
 
 class GraphCanvas:
     def __init__(self, root):
@@ -36,5 +38,10 @@ class GraphCanvas:
         return None
 
     def draw_edge(self, node1, node2):
-        edge = Edge(node1, node2, self.canvas)
-        self.graph.add_edge(node1, node2)
+        dialog = EdgeDialog(self.root)
+
+        weight = getattr(dialog, 'weight', 1)
+        directed = getattr(dialog, 'directed', False)
+
+        edge = Edge(node1, node2, self.canvas, weight, directed)
+        self.graph.add_edge(edge)

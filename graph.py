@@ -9,8 +9,8 @@ class Graph:
     def add_node(self, node):
         self.nodes.append(node)
 
-    def add_edge(self, node1, node2):
-        self.edges.append((node1, node2))
+    def add_edge(self, edge):
+        self.edges.append(edge)
 
     def get_neighbors(self, node):
         return [n2 for n1, n2 in self.edges if n1 == node] + [n1 for n1, n2 in self.edges if n2 == node]
