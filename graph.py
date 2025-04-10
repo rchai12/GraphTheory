@@ -14,3 +14,9 @@ class Graph:
 
     def get_neighbors(self, node):
         return [n2 for n1, n2 in self.edges if n1 == node] + [n1 for n1, n2 in self.edges if n2 == node]
+
+    def remove_edge(self, edge):
+        self.edge.remove(edge)
+    
+    def remove_node(self, node):
+        self.nodes.remove(node)

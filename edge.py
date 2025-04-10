@@ -8,7 +8,6 @@ class Edge:
         self.weight = weight
         self.directed = directed
 
-
         self.id = self.canvas.create_line(
             node1.x, node1.y, node2.x, node2.y,
             fill="gray", width=2,
