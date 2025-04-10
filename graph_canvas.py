@@ -8,7 +8,7 @@ from edge_dialogue import EdgeDialog
 class GraphCanvas:
     def __init__(self, root):
         self.root = root
-        self.canvas = tk.Canvas(root, width=600, height=400, bg="white")
+        self.canvas = tk.Canvas(root, width=1920, height=1080, bg="white")
         self.canvas.pack()
 
         self.graph = Graph()
@@ -68,10 +68,13 @@ class GraphCanvas:
 
     def draw_edge(self, node1, node2):
         dialog = EdgeDialog(self.root)
+        if dialog.result == 'cancel':
+            return
         weight = getattr(dialog, 'weight', 1)
         directed = getattr(dialog, 'directed', False)
         edge = Edge(node1, node2, self.canvas, weight, directed)
         self.graph.add_edge(edge)
+        
 
     def delete_node(self, node):
         edges_to_remove = [
