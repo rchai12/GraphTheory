@@ -25,7 +25,8 @@ class EdgeDialog(simpledialog.Dialog):
             self.weight = 1 
 
         self.directed = bool(self.directed_var.get())
+        self.result = (self.weight, self.directed)
 
     def cancel(self):
-        self.result = 'cancel'
+        self.result = None
         self.destroy()

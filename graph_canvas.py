@@ -14,6 +14,7 @@ class GraphCanvas:
         self.graph = Graph()
         self.selected_nodes_for_edge = []
         self.dragging_node = None
+        self.node_counter = 0
 
         self.canvas.bind("<Button-1>", self.on_left_click)
         self.canvas.bind("<B1-Motion>", self.on_drag)
@@ -63,8 +64,9 @@ class GraphCanvas:
         self.dragging_node = None
 
     def create_node(self, x, y):
-        node = Node(x, y, self.canvas)
+        node = Node(x, y, self.canvas, self.node_counter)
         self.graph.add_node(node)
+        self.node_counter += 1
 
     def draw_edge(self, node1, node2):
         dialog = EdgeDialog(self.root)
@@ -96,22 +98,9 @@ class GraphCanvas:
 
     def update_canvas(self):
         for edge in self.graph.edges:
-            self.canvas.coords(
-                edge.id,
-                edge.node1.x, edge.node1.y,
-                edge.node2.x, edge.node2.y
-            )
-
-            mid_x = (edge.node1.x + edge.node2.x) / 2
-            mid_y = (edge.node1.y + edge.node2.y) / 2
-            self.canvas.coords(edge.weight_text_id, mid_x, mid_y)
-
+            edge.update_edge()
         for node in self.graph.nodes:
-            self.canvas.coords(
-                node.id,
-                node.x - node.radius, node.y - node.radius,
-                node.x + node.radius, node.y + node.radius
-            )
+            node.update_position()
 
     def reset_buttons(self):
         self.left_pressed = False

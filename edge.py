@@ -22,3 +22,10 @@ class Edge:
             fill="black",
             font=("Arial", 10)
         )
+    
+    def update_edge(self):
+        self.canvas.coords(self.id, self.node1.x, self.node1.y, self.node2.x, self.node2.y)
+        
+        mid_x = (self.node1.x + self.node2.x) / 2
+        mid_y = (self.node1.y + self.node2.y) / 2
+        self.canvas.coords(self.weight_text_id, mid_x, mid_y)
