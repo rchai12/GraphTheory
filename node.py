@@ -26,3 +26,6 @@ class Node:
     def delete_from_canvas(self):
         self.canvas.delete(self.node_circle)
         self.canvas.delete(self.node_text)
+    
+    def highlight(self, color):
+        self.canvas.itemconfig(self.node_circle, fill=color)

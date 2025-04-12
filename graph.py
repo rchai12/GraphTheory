@@ -16,8 +16,8 @@ class Graph:
         neighbors = []
         for edge in self.edges:
             if edge.node1 == node:
-                neighbors.append(edge.node2)
-            elif edge.node2 == node:
+                neighbors.append(edge.node2) 
+            elif not edge.directed and edge.node2 == node:
                 neighbors.append(edge.node1)
         return neighbors
 

@@ -4,6 +4,9 @@ from node import Node
 from edge import Edge
 from graph import Graph
 from edge_dialogue import EdgeDialog
+from bfs import BFS
+import math
+from tkinter import messagebox
 
 class GraphCanvas:
     def __init__(self, root):
@@ -26,10 +29,14 @@ class GraphCanvas:
         self.left_pressed = False
         self.right_pressed = False
 
+        self.button_frame = tk.Frame(root)
+        self.button_frame.pack(pady=1)
         self.delete_button = tk.Button(root, text="Toggle Delete Mode", command=self.toggle_delete_mode)
-        self.delete_button.pack()
+        self.delete_button.pack(side=tk.LEFT, padx=5)
         self.clear_button = tk.Button(root, text="Clear Canvas", command=self.clear_canvas)
-        self.clear_button.pack(side=tk.TOP, pady=10)
+        self.clear_button.pack(side=tk.LEFT, padx=5)
+        self.bfs_button = tk.Button(root, text="Run Breadth-First Search", command=self.run_bfs)
+        self.bfs_button.pack(side=tk.LEFT, padx=5)
 
     def check_for_delete(self, event):
         if event.num == 1:
@@ -44,13 +51,17 @@ class GraphCanvas:
         self.root.after(100, self.reset_buttons)
 
     def on_left_click(self, event):
-        node = self.get_node_at(event.x, event.y)
-        
         if self.delete_mode:
+            edge = self.get_edge_at(event.x, event.y)
+            if edge:
+                self.delete_edge(edge)
+                return
+            node = self.get_node_at(event.x, event.y)
             if node:
                 self.delete_node(node)
-            return 
-
+                return 
+        
+        node = self.get_node_at(event.x, event.y)
         if not node:
             self.create_node(event.x, event.y)
         elif len(self.selected_nodes_for_edge) == 0:
@@ -81,10 +92,11 @@ class GraphCanvas:
 
     def draw_edge(self, node1, node2):
         dialog = EdgeDialog(self.root)
-        if dialog.result == 'cancel':
+        print(f"EdgeDialog: result set to {dialog.result}")
+        if dialog.result is None:
+            print("Dialog was canceled.")
             return
-        weight = getattr(dialog, 'weight', 1)
-        directed = getattr(dialog, 'directed', False)
+        weight, directed = dialog.result
         edge = Edge(node1, node2, self.canvas, weight, directed)
         self.graph.add_edge(edge)
         
@@ -93,11 +105,31 @@ class GraphCanvas:
         self.graph.remove_node(node) 
         node.delete_from_canvas()
 
+    def delete_edge(self, edge):
+        print(f"Deleting edge from {edge.node1.id} to {edge.node2.id}")
+        edge.delete_from_canvas()
+        self.graph.remove_edge(edge)
+
     def get_node_at(self, x, y):
         for node in self.graph.nodes:
             if node.contains_point(x, y):
                 return node
         return None
+
+    def get_edge_at(self, x, y):
+        for edge in self.graph.edges:
+            if self.is_point_near_edge(x, y, edge):
+                return edge
+        return None
+    
+    def is_point_near_edge(self, x, y, edge):
+        tolerance = 10 
+        x1, y1 = edge.node1.x, edge.node1.y
+        x2, y2 = edge.node2.x, edge.node2.y
+        num = abs((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1)
+        den = math.hypot(y2 - y1, x2 - x1)
+        distance = num / den if den != 0 else float('inf')
+        return distance <= tolerance
 
     def update_canvas(self):
         for edge in self.graph.edges:
@@ -123,3 +155,40 @@ class GraphCanvas:
         self.graph.edges.clear()
         self.node_counter = 0
 
+    def run_bfs(self):
+        self.canvas.bind("<Button-1>", self.select_bfs_start)
+        messagebox.showinfo("Pick a Node", f"Click on a node to start BFS traversal...")
+
+    def select_bfs_start(self, event):
+        print(f"Clicked at ({event.x}, {event.y})") 
+        node = self.get_node_at(event.x, event.y)
+        if node:
+            print(f"Selected node {node.id} for BFS")
+            bfs = BFS(self.graph)
+            steps = bfs.traverse(node)
+            traversal_ids = [step[1].id for step in steps if step[0] == 'node']
+            self.animate_traversal(steps, lambda: self.show_bfs_result(traversal_ids))
+            messagebox.showinfo("BFS Traversal", f"Order: {traversal_ids}")
+            self.canvas.unbind("<Button-1>")
+            self.canvas.bind("<Button-1>", self.on_left_click)
+
+    def animate_traversal(self, steps, on_complete=None, index=0):
+        if index >= len(steps):
+            if on_complete:
+                on_complete()
+            return
+        step_type, item = steps[index]
+        if step_type == 'node':
+            item.highlight("red")
+        elif step_type == 'edge':
+            node1, node2 = item
+            edge = self.find_edge_between(node1, node2)
+            if edge:
+                edge.highlight("green")
+        self.canvas.after(500, lambda: self.animate_traversal(steps, on_complete, index + 1))
+    
+    def find_edge_between(self, node1, node2):
+        for edge in self.graph.edges:
+            if (edge.node1 == node1 and edge.node2 == node2) or (edge.node1 == node2 and edge.node2 == node1):
+                return edge
+        return None

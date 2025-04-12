@@ -8,11 +8,13 @@ class Edge:
         self.weight = weight
         self.directed = directed
 
+        print(f"Drawing edge from ({node1.x}, {node1.y}) to ({node2.x}, {node2.y})")
         self.id = self.canvas.create_line(
             node1.x, node1.y, node2.x, node2.y,
             fill="gray", width=2,
             arrow=tk.LAST if self.directed else None
         )
+        print(f"Edge ID: {self.id}")
 
         mid_x = (node1.x + node2.x) / 2
         mid_y = (node1.y + node2.y) / 2
@@ -22,6 +24,7 @@ class Edge:
             fill="black",
             font=("Arial", 10)
         )
+        print(f"Weight text ID: {self.weight_text_id}")
     
     def update_edge(self):
         self.canvas.coords(self.id, self.node1.x, self.node1.y, self.node2.x, self.node2.y)
@@ -33,3 +36,7 @@ class Edge:
     def delete_from_canvas(self):
         self.canvas.delete(self.id)
         self.canvas.delete(self.weight_text_id)
+    
+    def highlight(self, color):
+        self.canvas.itemconfig(self.id, fill=color)
+        self.canvas.itemconfig(self.weight_text_id, fill=color)
