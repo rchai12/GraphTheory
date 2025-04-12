@@ -15,6 +15,7 @@ class GraphCanvas:
         self.selected_nodes_for_edge = []
         self.dragging_node = None
         self.node_counter = 0
+        self.delete_mode = False
 
         self.canvas.bind("<Button-1>", self.on_left_click)
         self.canvas.bind("<B1-Motion>", self.on_drag)
@@ -24,6 +25,11 @@ class GraphCanvas:
 
         self.left_pressed = False
         self.right_pressed = False
+
+        self.delete_button = tk.Button(root, text="Toggle Delete Mode", command=self.toggle_delete_mode)
+        self.delete_button.pack()
+        self.clear_button = tk.Button(root, text="Clear Canvas", command=self.clear_canvas)
+        self.clear_button.pack(side=tk.TOP, pady=10)
 
     def check_for_delete(self, event):
         if event.num == 1:
@@ -40,6 +46,11 @@ class GraphCanvas:
     def on_left_click(self, event):
         node = self.get_node_at(event.x, event.y)
         
+        if self.delete_mode:
+            if node:
+                self.delete_node(node)
+            return 
+
         if not node:
             self.create_node(event.x, event.y)
         elif len(self.selected_nodes_for_edge) == 0:
@@ -77,18 +88,10 @@ class GraphCanvas:
         edge = Edge(node1, node2, self.canvas, weight, directed)
         self.graph.add_edge(edge)
         
-
     def delete_node(self, node):
-        edges_to_remove = [
-            edge for edge in self.graph.edges
-            if edge.node1 == node or edge.node2 == node
-        ]
-        for edge in edges_to_remove:
-            self.canvas.delete(edge.id)
-            self.canvas.delete(edge.weight_text_id)
-            self.graph.remove_edge(edge)
-        self.canvas.delete(node.id)
-        self.graph.remove_node(node)
+        print(f"Deleting node {node.id}")
+        self.graph.remove_node(node) 
+        node.delete_from_canvas()
 
     def get_node_at(self, x, y):
         for node in self.graph.nodes:
@@ -105,3 +108,18 @@ class GraphCanvas:
     def reset_buttons(self):
         self.left_pressed = False
         self.right_pressed = False
+
+    def toggle_delete_mode(self):
+        self.delete_mode = not self.delete_mode
+        status = "ON" if self.delete_mode else "OFF"
+        self.delete_button.config(text=f"Delete Mode: {status}")
+    
+    def clear_canvas(self):
+        for edge in self.graph.edges:
+            edge.delete_from_canvas()
+        for node in self.graph.nodes:
+            node.delete_from_canvas()
+        self.graph.nodes.clear()
+        self.graph.edges.clear()
+        self.node_counter = 0
+

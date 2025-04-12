@@ -22,3 +22,7 @@ class Node:
     def update_position(self):
         self.canvas.coords(self.node_circle, self.x - self.radius, self.y - self.radius, self.x + self.radius, self.y + self.radius)
         self.canvas.coords(self.node_text, self.x, self.y)
+
+    def delete_from_canvas(self):
+        self.canvas.delete(self.node_circle)
+        self.canvas.delete(self.node_text)

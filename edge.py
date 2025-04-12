@@ -29,3 +29,7 @@ class Edge:
         mid_x = (self.node1.x + self.node2.x) / 2
         mid_y = (self.node1.y + self.node2.y) / 2
         self.canvas.coords(self.weight_text_id, mid_x, mid_y)
+
+    def delete_from_canvas(self):
+        self.canvas.delete(self.id)
+        self.canvas.delete(self.weight_text_id)
