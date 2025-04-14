@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import simpledialog
 from node import Node
 from edge import Edge
 from graph import Graph
@@ -12,6 +11,7 @@ from dfs import DFS
 class GraphCanvas:
     def __init__(self, root):
         self.root = root
+        self.root.geometry("1280x760")
         self.canvas = tk.Canvas(root, width=1280, height=720, bg="white")
         self.canvas.pack()
 
@@ -22,7 +22,6 @@ class GraphCanvas:
         self.delete_mode = False
 
         self.canvas.bind("<Button-1>", self.on_left_click)
-        self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
         self.canvas.bind("<Button-3>", self.on_right_click)
         self.canvas.bind("<B3-Motion>", self.on_drag)
@@ -42,18 +41,6 @@ class GraphCanvas:
         self.bfs_button.pack(side=tk.LEFT, padx=5)
         self.dfs_button = tk.Button(root, text="Run Depth-First Search", command=self.run_dfs)
         self.dfs_button.pack(side=tk.LEFT, padx=5)
-
-    def check_for_delete(self, event):
-        if event.num == 1:
-            self.left_pressed = True
-        elif event.num == 3:
-            self.right_pressed = True
-
-        if self.left_pressed and self.right_pressed:
-            node = self.get_node_at(event.x, event.y)
-            if node:
-                self.delete_node(node)
-        self.root.after(100, self.reset_buttons)
 
     def on_left_click(self, event):
         if self.delete_mode:
@@ -108,11 +95,9 @@ class GraphCanvas:
     def delete_node(self, node):
         print(f"Deleting node {node.id}")
         self.graph.remove_node(node) 
-        node.delete_from_canvas()
 
     def delete_edge(self, edge):
         print(f"Deleting edge from {edge.node1.id} to {edge.node2.id}")
-        edge.delete_from_canvas()
         self.graph.remove_edge(edge)
 
     def get_node_at(self, x, y):
@@ -152,12 +137,7 @@ class GraphCanvas:
         self.delete_button.config(text=f"Delete Mode: {status}")
     
     def clear_canvas(self):
-        for edge in self.graph.edges:
-            edge.delete_from_canvas()
-        for node in self.graph.nodes:
-            node.delete_from_canvas()
-        self.graph.nodes.clear()
-        self.graph.edges.clear()
+        self.graph.delete_graph()
         self.node_counter = 0
 
     def run_bfs(self):

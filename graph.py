@@ -22,6 +22,7 @@ class Graph:
         return neighbors
 
     def remove_edge(self, edge):
+        edge.delete_from_canvas()
         if edge in self.edges:
             self.edges.remove(edge)
     
@@ -33,4 +34,13 @@ class Graph:
         for edge in edges_to_remove:
             edge.delete_from_canvas()
             self.remove_edge(edge)
+        node.delete_from_canvas()
         self.nodes.remove(node)
+
+    def delete_graph(self):
+        for edge in self.edges:
+            edge.delete_from_canvas()
+        for node in self.nodes:
+            node.delete_from_canvas()
+        self.nodes.clear()
+        self.edges.clear()
