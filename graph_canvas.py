@@ -7,11 +7,12 @@ from edge_dialogue import EdgeDialog
 from bfs import BFS
 import math
 from tkinter import messagebox
+from dfs import DFS
 
 class GraphCanvas:
     def __init__(self, root):
         self.root = root
-        self.canvas = tk.Canvas(root, width=1920, height=1080, bg="white")
+        self.canvas = tk.Canvas(root, width=1280, height=720, bg="white")
         self.canvas.pack()
 
         self.graph = Graph()
@@ -37,6 +38,8 @@ class GraphCanvas:
         self.clear_button.pack(side=tk.LEFT, padx=5)
         self.bfs_button = tk.Button(root, text="Run Breadth-First Search", command=self.run_bfs)
         self.bfs_button.pack(side=tk.LEFT, padx=5)
+        self.dfs_button = tk.Button(root, text="Run Depth-First Search", command=self.run_dfs)
+        self.dfs_button.pack(side=tk.LEFT, padx=5)
 
     def check_for_delete(self, event):
         if event.num == 1:
@@ -192,3 +195,20 @@ class GraphCanvas:
             if (edge.node1 == node1 and edge.node2 == node2) or (edge.node1 == node2 and edge.node2 == node1):
                 return edge
         return None
+    
+    def run_dfs(self):
+        self.canvas.bind("<Button-1>", self.select_dfs_start)
+        messagebox.showinfo("Pick a Node", f"Click on a node to start DFS traversal...")
+
+    def select_dfs_start(self, event):
+        print(f"Clicked at ({event.x}, {event.y})") 
+        node = self.get_node_at(event.x, event.y)
+        if node:
+            print(f"Selected node {node.id} for BFS")
+            dfs = DFS(self.graph)
+            steps = dfs.traverse(node)
+            traversal_ids = [step[1].id for step in steps if step[0] == 'node']
+            self.animate_traversal(steps, lambda: self.show_dfs_result(traversal_ids))
+            messagebox.showinfo("DFS Traversal", f"Order: {traversal_ids}")
+            self.canvas.unbind("<Button-1>")
+            self.canvas.bind("<Button-1>", self.on_left_click)
