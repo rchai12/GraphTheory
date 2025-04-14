@@ -40,3 +40,7 @@ class Edge:
     def highlight(self, color):
         self.canvas.itemconfig(self.id, fill=color)
         self.canvas.itemconfig(self.weight_text_id, fill=color)
+
+    def reset_color(self):
+        self.canvas.itemconfig(self.id, fill = "grey")
+        self.canvas.itemconfig(self.weight_text_id, fill = "black")

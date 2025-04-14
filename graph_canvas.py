@@ -36,6 +36,8 @@ class GraphCanvas:
         self.delete_button.pack(side=tk.LEFT, padx=5)
         self.clear_button = tk.Button(root, text="Clear Canvas", command=self.clear_canvas)
         self.clear_button.pack(side=tk.LEFT, padx=5)
+        self.reset_colors_button = tk.Button(root, text="Reset Colors", command=self.reset_colors)
+        self.reset_colors_button.pack(side=tk.LEFT, padx=5)
         self.bfs_button = tk.Button(root, text="Run Breadth-First Search", command=self.run_bfs)
         self.bfs_button.pack(side=tk.LEFT, padx=5)
         self.dfs_button = tk.Button(root, text="Run Depth-First Search", command=self.run_dfs)
@@ -188,7 +190,7 @@ class GraphCanvas:
             edge = self.find_edge_between(node1, node2)
             if edge:
                 edge.highlight("green")
-        self.canvas.after(500, lambda: self.animate_traversal(steps, on_complete, index + 1))
+        self.canvas.after(750, lambda: self.animate_traversal(steps, on_complete, index + 1))
     
     def find_edge_between(self, node1, node2):
         for edge in self.graph.edges:
@@ -212,3 +214,9 @@ class GraphCanvas:
             messagebox.showinfo("DFS Traversal", f"Order: {traversal_ids}")
             self.canvas.unbind("<Button-1>")
             self.canvas.bind("<Button-1>", self.on_left_click)
+
+    def reset_colors(self, event=None):
+        for node in self.graph.nodes:
+            node.reset_color()
+        for edge in self.graph.edges:
+            edge.reset_color()
