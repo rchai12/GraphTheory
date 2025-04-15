@@ -19,13 +19,14 @@ class TopSort:
 
     def _dfs(self, node):
         self.visited.add(node)
+        self.rec_stack.add(node)
         self.steps.append(('node', node))
 
         for neighbor in self.graph.get_neighbors(node):
             self.steps.append(('edge', (node, neighbor)))
             if neighbor in self.rec_stack:
-                messagebox.showinfo("Cycle Detected!", f"Cycle detected at edge {node} -> {neighbor}")
-                raise ValueError(f"Cycle detected at edge {node} -> {neighbor}")
+                messagebox.showinfo("Cycle Detected!", f"Cycle detected at edge {node.id} -> {neighbor.id}")
+                raise ValueError(f"Cycle detected at edge {node.id} -> {neighbor.id}")
             if neighbor not in self.visited:
                 self._dfs(neighbor)
 
