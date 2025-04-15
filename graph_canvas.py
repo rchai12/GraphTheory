@@ -7,6 +7,7 @@ from bfs import BFS
 import math
 from tkinter import messagebox
 from dfs import DFS
+from top_sort import TopSort
 
 class GraphCanvas:
     def __init__(self, root):
@@ -41,6 +42,8 @@ class GraphCanvas:
         self.bfs_button.pack(side=tk.LEFT, padx=5)
         self.dfs_button = tk.Button(root, text="Run Depth-First Search", command=self.run_dfs)
         self.dfs_button.pack(side=tk.LEFT, padx=5)
+        self.topSort_button = tk.Button(root, text="Run Topological Sort", command=self.run_top_sort)
+        self.topSort_button.pack(side=tk.LEFT, padx=5)
 
     def on_left_click(self, event):
         if self.delete_mode:
@@ -195,7 +198,25 @@ class GraphCanvas:
             self.canvas.unbind("<Button-1>")
             self.canvas.bind("<Button-1>", self.on_left_click)
 
-    def reset_colors(self, event=None):
+    def run_top_sort(self):
+        self.canvas.bind("<Button-1>", self.select_top_sort_start)
+        messagebox.showinfo("Pick a Node", f"Click on a node to start Topological Sort...")
+
+    def select_top_sort_start(self, event):
+        print(f"Clicked at ({event.x}, {event.y})") 
+        node = self.get_node_at(event.x, event.y)
+        if node:
+            print(f"Selected node {node.id} for Topological Sort")
+            top_sort = TopSort(self.graph)
+            steps = top_sort.traverse(node)
+            traversal_ids = [step[1].id for step in steps if step[0] == 'node']
+            sorted_ids = [node.id for node in top_sort.stack]
+            self.animate_traversal(steps, lambda: self.show_top_sort_result(traversal_ids))
+            messagebox.showinfo("Topological Sort Traversal", f"Order: {traversal_ids}\nTopological Sort Result: {sorted_ids}")
+            self.canvas.unbind("<Button-1>")
+            self.canvas.bind("<Button-1>", self.on_left_click)
+
+    def reset_colors(self):
         for node in self.graph.nodes:
             node.reset_color()
         for edge in self.graph.edges:
