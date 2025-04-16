@@ -8,6 +8,8 @@ import math
 from tkinter import messagebox
 from dfs import DFS
 from top_sort import TopSort
+from Dijkstra import Dijkstra
+
 
 class GraphCanvas:
     def __init__(self, root):
@@ -44,6 +46,9 @@ class GraphCanvas:
         self.dfs_button.pack(side=tk.LEFT, padx=5)
         self.topSort_button = tk.Button(root, text="Run Topological Sort", command=self.run_top_sort)
         self.topSort_button.pack(side=tk.LEFT, padx=5)
+        self.dijkstra_button = tk.Button(root, text="Run Dijkstra's Algorithm", command=self.run_dijkstra)
+        self.dijkstra_button.pack(side=tk.LEFT, padx=5)
+
 
     def on_left_click(self, event):
         if self.delete_mode:
@@ -215,6 +220,27 @@ class GraphCanvas:
             messagebox.showinfo("Topological Sort Traversal", f"Order: {traversal_ids}\nTopological Sort Result: {sorted_ids}")
             self.canvas.unbind("<Button-1>")
             self.canvas.bind("<Button-1>", self.on_left_click)
+
+    def run_dijkstra(self):
+        self.canvas.bind("<Button-1>", self.select_dijkstra_start)
+        messagebox.showinfo("Pick a Node", "Click on a node to start Dijkstra's Algorithm...")
+
+
+    def select_dijkstra_start(self, event):
+        print(f"Dijkstra: Click at ({event.x}, {event.y})")
+        node = self.get_node_at(event.x, event.y)
+        if node:
+            print(f"Selected node {node.id} for Dijkstra")
+            dijkstra = Dijkstra(self.graph)
+            steps = dijkstra.run(node)
+            traversal_ids = [step[1].id for step in steps if step[0] == 'node']
+            self.animate_traversal(steps, lambda: messagebox.showinfo("Dijkstra Traversal", f"Visit Order: {traversal_ids}"))
+            self.canvas.unbind("<Button-1>")
+            self.canvas.bind("<Button-1>", self.on_left_click)
+
+
+            
+    
 
     def reset_colors(self):
         for node in self.graph.nodes:
