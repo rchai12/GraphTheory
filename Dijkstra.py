@@ -42,4 +42,4 @@ class Dijkstra:
                         heapq.heappush(heap, (new_distance, neighbor.id, neighbor))
                         steps.append(('edge', (current_node, neighbor)))
                         
-        return steps
+        return steps, distances

@@ -232,15 +232,15 @@ class GraphCanvas:
         if node:
             print(f"Selected node {node.id} for Dijkstra")
             dijkstra = Dijkstra(self.graph)
-            steps = dijkstra.run(node)
+            steps, distances = dijkstra.run(node)
             traversal_ids = [step[1].id for step in steps if step[0] == 'node']
             self.animate_traversal(steps, lambda: messagebox.showinfo("Dijkstra Traversal", f"Visit Order: {traversal_ids}"))
+            dist_str = "\n".join(f"Node {nid}: {dist:.2f}" for nid, dist in distances.items())
+            messagebox.showinfo(f"Minimum Distances for {node.id}", f"{dist_str}")
             self.canvas.unbind("<Button-1>")
             self.canvas.bind("<Button-1>", self.on_left_click)
 
 
-            
-    
 
     def reset_colors(self):
         for node in self.graph.nodes:
