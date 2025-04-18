@@ -21,7 +21,6 @@ class TopSort:
         self.visited.add(node)
         self.rec_stack.add(node)
         self.steps.append(('node', node))
-
         for neighbor in self.graph.get_neighbors(node):
             self.steps.append(('edge', (node, neighbor)))
             if neighbor in self.rec_stack:
@@ -29,6 +28,6 @@ class TopSort:
                 raise ValueError(f"Cycle detected at edge {node.id} -> {neighbor.id}")
             if neighbor not in self.visited:
                 self._dfs(neighbor)
-
+        self.rec_stack.remove(node)
         self.stack.append(node)  # ordering is built in reverse
 

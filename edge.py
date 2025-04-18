@@ -44,3 +44,28 @@ class Edge:
     def reset_color(self):
         self.canvas.itemconfig(self.id, fill = "grey")
         self.canvas.itemconfig(self.weight_text_id, fill = "black")
+
+    def update(self, new_weight=None, new_directed=None):
+        if new_weight is not None:
+            self.weight = new_weight
+            self.canvas.itemconfig(self.weight_text_id, text=str(self.weight))
+        if new_directed is not None:
+            self.directed = new_directed
+            self.canvas.delete(self.id)
+            self.canvas.delete(self.weight_text_id)
+            self.id = self.canvas.create_line(
+                self.node1.x, self.node1.y, self.node2.x, self.node2.y,
+                fill="gray", width=2,
+                arrow=tk.LAST if self.directed else None
+            )
+            mid_x = (self.node1.x + self.node2.x) / 2
+            mid_y = (self.node1.y + self.node2.y) / 2
+            self.weight_text_id = self.canvas.create_text(
+                mid_x, mid_y,
+                text=str(self.weight),
+                fill="black",
+                font=("Arial", 10)
+            )
+    
+    def highlight_selected(self):
+        self.highlight("orange")

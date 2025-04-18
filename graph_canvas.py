@@ -9,7 +9,8 @@ from tkinter import messagebox
 from dfs import DFS
 from top_sort import TopSort
 from Dijkstra import Dijkstra
-
+from bellmanFord import BellmanFord
+from edit_edge_dialogue import EditEdgeDialog
 
 class GraphCanvas:
     def __init__(self, root):
@@ -23,9 +24,11 @@ class GraphCanvas:
         self.dragging_node = None
         self.node_counter = 0
         self.delete_mode = False
+        self.edit_mode = False
+
 
         self.canvas.bind("<Button-1>", self.on_left_click)
-        self.canvas.bind("<ButtonRelease-1>", self.on_release)
+        self.canvas.bind("<ButtonRelease-3>", self.on_release)
         self.canvas.bind("<Button-3>", self.on_right_click)
         self.canvas.bind("<B3-Motion>", self.on_drag)
 
@@ -36,6 +39,8 @@ class GraphCanvas:
         self.button_frame.pack(pady=1)
         self.delete_button = tk.Button(root, text="Toggle Delete Mode", command=self.toggle_delete_mode)
         self.delete_button.pack(side=tk.LEFT, padx=5)
+        self.edit_button = tk.Button(root, text="Toggle Edit Mode", command=self.toggle_edit_mode)
+        self.edit_button.pack(side=tk.LEFT, padx=5)
         self.clear_button = tk.Button(root, text="Clear Canvas", command=self.clear_canvas)
         self.clear_button.pack(side=tk.LEFT, padx=5)
         self.reset_colors_button = tk.Button(root, text="Reset Colors", command=self.reset_colors)
@@ -48,7 +53,8 @@ class GraphCanvas:
         self.topSort_button.pack(side=tk.LEFT, padx=5)
         self.dijkstra_button = tk.Button(root, text="Run Dijkstra's Algorithm", command=self.run_dijkstra)
         self.dijkstra_button.pack(side=tk.LEFT, padx=5)
-
+        self.bellman_ford_button = tk.Button(root, text="Run Bellman Ford's Algorithm", command=self.run_bellman_ford)
+        self.bellman_ford_button.pack(side=tk.LEFT, padx=5)
 
     def on_left_click(self, event):
         if self.delete_mode:
@@ -60,20 +66,29 @@ class GraphCanvas:
             if node:
                 self.delete_node(node)
                 return 
-        
+        if self.edit_mode:
+            edge = self.get_edge_at(event.x, event.y)
+            if edge:
+                self.edit_edge(edge)
+                return
         node = self.get_node_at(event.x, event.y)
         if not node:
             self.create_node(event.x, event.y)
         elif len(self.selected_nodes_for_edge) == 0:
             self.selected_nodes_for_edge.append(node)
+            node.highlight_selected()
         elif len(self.selected_nodes_for_edge) == 1:
             self.selected_nodes_for_edge.append(node)
+            node.highlight_selected()
             self.draw_edge(self.selected_nodes_for_edge[0], self.selected_nodes_for_edge[1])
+            self.selected_nodes_for_edge[0].reset_color()
+            node.reset_color()
             self.selected_nodes_for_edge.clear()  
 
     def on_right_click(self, event):
         node = self.get_node_at(event.x, event.y)
         if node:
+            node.highlight_selected()
             self.dragging_node = node
 
     def on_drag(self, event):
@@ -83,7 +98,9 @@ class GraphCanvas:
             self.update_canvas()
 
     def on_release(self, event):
-        self.dragging_node = None
+        if self.dragging_node:
+            self.dragging_node.reset_color()
+            self.dragging_node = None
 
     def create_node(self, x, y):
         node = Node(x, y, self.canvas, self.node_counter)
@@ -213,11 +230,15 @@ class GraphCanvas:
         if node:
             print(f"Selected node {node.id} for Topological Sort")
             top_sort = TopSort(self.graph)
-            steps = top_sort.traverse(node)
-            traversal_ids = [step[1].id for step in steps if step[0] == 'node']
-            sorted_ids = [node.id for node in top_sort.stack]
-            self.animate_traversal(steps, lambda: self.show_top_sort_result(traversal_ids))
-            messagebox.showinfo("Topological Sort Traversal", f"Order: {traversal_ids}\nTopological Sort Result: {sorted_ids}")
+            try:
+                steps = top_sort.traverse(node)
+                traversal_ids = [step[1].id for step in steps if step[0] == 'node']
+                sorted_ids = [node.id for node in top_sort.stack]
+                self.animate_traversal(steps, lambda: self.show_top_sort_result(traversal_ids))
+                messagebox.showinfo("Topological Sort Traversal", f"Order: {traversal_ids}\nTopological Sort Result: {sorted_ids}")
+            except ValueError as e:
+                messagebox.showerror("Cycle Detected", str(e)) 
+                print("Cycle detected during topological sort, aborting operation.")
             self.canvas.unbind("<Button-1>")
             self.canvas.bind("<Button-1>", self.on_left_click)
 
@@ -232,18 +253,58 @@ class GraphCanvas:
         if node:
             print(f"Selected node {node.id} for Dijkstra")
             dijkstra = Dijkstra(self.graph)
-            steps, distances = dijkstra.run(node)
-            traversal_ids = [step[1].id for step in steps if step[0] == 'node']
-            self.animate_traversal(steps, lambda: messagebox.showinfo("Dijkstra Traversal", f"Visit Order: {traversal_ids}"))
-            dist_str = "\n".join(f"Node {nid}: {dist:.2f}" for nid, dist in distances.items())
-            messagebox.showinfo(f"Minimum Distances for {node.id}", f"{dist_str}")
+            try: 
+                steps, distances = dijkstra.run(node)
+                traversal_ids = [step[1].id for step in steps if step[0] == 'node']
+                self.animate_traversal(steps, lambda: messagebox.showinfo("Dijkstra Traversal", f"Visit Order: {traversal_ids}"))
+                dist_str = "\n".join(f"Node {nid}: {dist:.2f}" for nid, dist in distances.items())
+                messagebox.showinfo(f"Minimum Distances for {node.id}", f"{dist_str}")
+            except ValueError as e:
+                messagebox.showerror("Error Detected", str(e)) 
+                print("Error detected during Dijkstra's algorithm, aborting operation.")
             self.canvas.unbind("<Button-1>")
             self.canvas.bind("<Button-1>", self.on_left_click)
 
+    def run_bellman_ford(self):
+        self.canvas.bind("<Button-1>", self.select_bellman_ford_start)
+        messagebox.showinfo("Pick a Node", "Click on a node to start Bellman Ford's Algorithm...")
 
+
+    def select_bellman_ford_start(self, event):
+        print(f"Bellman Ford: Click at ({event.x}, {event.y})")
+        node = self.get_node_at(event.x, event.y)
+        if node:
+            print(f"Selected node {node.id} for Bellman Ford")
+            bellmanFord = BellmanFord(self.graph)
+            try:
+                steps, distances = bellmanFord.run(node)
+                traversal_ids = [step[1].id for step in steps if step[0] == 'node']
+                self.animate_traversal(steps, lambda: messagebox.showinfo("Bellman Ford's Traversal", f"Visit Order: {traversal_ids}"))
+                dist_str = "\n".join(f"Node {nid}: {dist:.2f}" for nid, dist in distances.items())
+                messagebox.showinfo(f"Minimum Distances for {node.id}", f"{dist_str}")
+            except ValueError as e:
+                messagebox.showerror("Error Detected", str(e)) 
+                print("Error detected during Bellman Ford's algorithm, aborting operation.")
+            self.canvas.unbind("<Button-1>")
+            self.canvas.bind("<Button-1>", self.on_left_click)
 
     def reset_colors(self):
         for node in self.graph.nodes:
             node.reset_color()
         for edge in self.graph.edges:
+            edge.reset_color()
+
+    def toggle_edit_mode(self):
+        self.edit_mode = not self.edit_mode
+        status = "ON" if self.edit_mode else "OFF"
+        self.edit_button.config(text=f"Edit Mode: {status}")
+
+    def edit_edge(self, edge):
+        edge.highlight_selected()
+        edit_dialog = EditEdgeDialog(self.root, edge)
+        if edit_dialog.result is not None:
+            weight, directed = edit_dialog.result
+            edge.weight = weight
+            edge.directed = directed
+            self.update_canvas() 
             edge.reset_color()

@@ -32,3 +32,6 @@ class Node:
 
     def reset_color(self):
         self.canvas.itemconfig(self.node_circle, fill="skyblue")
+
+    def highlight_selected(self):
+        self.highlight("orange")
