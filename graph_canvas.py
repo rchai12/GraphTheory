@@ -307,4 +307,4 @@ class GraphCanvas:
             edge.weight = weight
             edge.directed = directed
             self.update_canvas() 
-            edge.reset_color()
+        edge.reset_color()
