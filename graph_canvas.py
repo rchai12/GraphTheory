@@ -11,6 +11,7 @@ from top_sort import TopSort
 from Dijkstra import Dijkstra
 from bellmanFord import BellmanFord
 from edit_edge_dialogue import EditEdgeDialog
+import json
 
 class GraphCanvas:
     def __init__(self, root):
@@ -55,6 +56,53 @@ class GraphCanvas:
         self.dijkstra_button.pack(side=tk.LEFT, padx=5)
         self.bellman_ford_button = tk.Button(root, text="Run Bellman Ford's Algorithm", command=self.run_bellman_ford)
         self.bellman_ford_button.pack(side=tk.LEFT, padx=5)
+        # add save button
+        self.save_button = tk.Button(root, text="Save Graph", command=self.save_graph)
+        self.save_button.pack(side=tk.LEFT, padx=5)
+def on_left_click(self, event):
+        # ... existing code ...
+        pass  # existing implementation
+
+    # ... other existing methods ...
+
+    def toggle_edit_mode(self):
+        self.edit_mode = not self.edit_mode
+        status = "ON" if self.edit_mode else "OFF"
+        self.edit_button.config(text=f"Edit Mode: {status}")
+
+    def save_graph(self):
+        """
+        Save the current graph (nodes and edges) to a JSON file.
+        """
+        graph_data = {
+            "nodes": [
+                {"id": node.id, "x": node.x, "y": node.y}
+                for node in self.graph.nodes
+            ],
+            "edges": [
+                {
+                    "from": edge.node1.id,
+                    "to": edge.node2.id,
+                    "weight": edge.weight,
+                    "directed": edge.directed
+                }
+                for edge in self.graph.edges
+            ]
+        }
+
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json")],
+            title="Save Graph As..."
+        )
+
+        if not file_path:
+            return
+
+        with open(file_path, "w") as f:
+            json.dump(graph_data, f, indent=4)
+
+        messagebox.showinfo("Save Successful", f"Graph saved to {file_path}")
 
     def on_left_click(self, event):
         if self.delete_mode:
