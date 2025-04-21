@@ -27,10 +27,6 @@ class EditEdgeDialog(simpledialog.Dialog):
             self.weight = float(self.weight_entry.get()) 
         except ValueError:
             self.weight = self.edge.weight 
-
         self.directed = bool(self.directed_var.get())
-        
-        self.edge.update(self.weight, self.directed)
         self.result = (self.weight, self.directed)
-        
         print(f"EditEdgeDialog: result set to {self.result}") 

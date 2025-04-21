@@ -304,7 +304,7 @@ class GraphCanvas:
         edit_dialog = EditEdgeDialog(self.root, edge)
         if edit_dialog.result is not None:
             weight, directed = edit_dialog.result
-            edge.weight = weight
+            edge.update(weight, directed)
             edge.directed = directed
             self.update_canvas() 
         edge.reset_color()
