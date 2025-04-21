@@ -56,6 +56,7 @@ class GraphCanvas:
         self.dijkstra_button.pack(side=tk.LEFT, padx=5)
         self.bellman_ford_button = tk.Button(root, text="Run Bellman Ford's Algorithm", command=self.run_bellman_ford)
         self.bellman_ford_button.pack(side=tk.LEFT, padx=5)
+        # add save button
         self.save_button = tk.Button(root, text="Save Graph", command=self.save_graph)
         self.save_button.pack(side=tk.LEFT, padx=5)
 def on_left_click(self, event):
