@@ -1,5 +1,3 @@
-from tkinter import messagebox
-
 class TopSort:
     def __init__(self, graph):
         self.graph = graph
@@ -24,7 +22,6 @@ class TopSort:
         for neighbor in self.graph.get_neighbors(node):
             self.steps.append(('edge', (node, neighbor)))
             if neighbor in self.rec_stack:
-                messagebox.showinfo("Cycle Detected!", f"Cycle detected at edge {node.id} -> {neighbor.id}")
                 raise ValueError(f"Cycle detected at edge {node.id} -> {neighbor.id}")
             if neighbor not in self.visited:
                 self._dfs(neighbor)

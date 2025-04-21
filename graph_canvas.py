@@ -133,19 +133,10 @@ class GraphCanvas:
 
     def get_edge_at(self, x, y):
         for edge in self.graph.edges:
-            if self.is_point_near_edge(x, y, edge):
+            if edge.is_point_near(x, y):
                 return edge
         return None
     
-    def is_point_near_edge(self, x, y, edge):
-        tolerance = 10 
-        x1, y1 = edge.node1.x, edge.node1.y
-        x2, y2 = edge.node2.x, edge.node2.y
-        num = abs((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1)
-        den = math.hypot(y2 - y1, x2 - x1)
-        distance = num / den if den != 0 else float('inf')
-        return distance <= tolerance
-
     def update_canvas(self):
         for edge in self.graph.edges:
             edge.update_edge()
@@ -199,6 +190,9 @@ class GraphCanvas:
     
     def find_edge_between(self, node1, node2):
         for edge in self.graph.edges:
+            if edge.directed:
+                if edge.node1 == node1 and edge.node2 == node2:
+                    return edge
             if (edge.node1 == node1 and edge.node2 == node2) or (edge.node1 == node2 and edge.node2 == node1):
                 return edge
         return None
@@ -245,7 +239,6 @@ class GraphCanvas:
     def run_dijkstra(self):
         self.canvas.bind("<Button-1>", self.select_dijkstra_start)
         messagebox.showinfo("Pick a Node", "Click on a node to start Dijkstra's Algorithm...")
-
 
     def select_dijkstra_start(self, event):
         print(f"Dijkstra: Click at ({event.x}, {event.y})")
@@ -305,5 +298,4 @@ class GraphCanvas:
         if edit_dialog.result is not None:
             weight, directed = edit_dialog.result
             edge.update(weight, directed)
-            self.update_canvas() 
         edge.reset_color()

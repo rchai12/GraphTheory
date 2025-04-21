@@ -1,4 +1,5 @@
 import tkinter as tk
+import math
 
 class Edge:
     def __init__(self, node1, node2, canvas, weight=1, directed = True):
@@ -26,6 +27,14 @@ class Edge:
         )
         print(f"Weight text ID: {self.weight_text_id}")
     
+    def is_point_near(self, x, y, tolerance=10):
+        x1, y1 = self.node1.x, self.node1.y
+        x2, y2 = self.node2.x, self.node2.y
+        num = abs((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1)
+        den = math.hypot(y2 - y1, x2 - x1)
+        distance = num / den if den != 0 else float('inf')
+        return distance <= tolerance
+
     def update_edge(self):
         self.canvas.coords(self.id, self.node1.x, self.node1.y, self.node2.x, self.node2.y)
         
@@ -66,6 +75,6 @@ class Edge:
                 fill="black",
                 font=("Arial", 10)
             )
-    
+
     def highlight_selected(self):
         self.highlight("orange")

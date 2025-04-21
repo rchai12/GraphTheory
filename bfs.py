@@ -18,4 +18,5 @@ class BFS:
                         queue.append(neighbor)
                         steps.append(('edge', (current_node, neighbor))) 
                         steps.append(('node', neighbor)) 
+        print(steps)
         return steps
